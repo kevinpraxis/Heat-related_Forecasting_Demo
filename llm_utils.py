@@ -1,5 +1,3 @@
-openai_key = "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"
-
 import pandas as pd
 
 from openai import OpenAI
