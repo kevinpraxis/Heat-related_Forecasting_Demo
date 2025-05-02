@@ -17,7 +17,11 @@ This interactive demo shows:
 
 # === Section 1: Embedded trend plot ===
 st.subheader("📈 Temperature–Spike Trends")
-components.iframe("https://github.com/kevinpraxis/climformatics-visuals/blob/main/tem_spike_trends.html", height=600)
+import streamlit.components.v1 as components
+
+with open("Assets/tem_spike_trends.html", "r", encoding="utf-8") as f:
+    html_string = f.read()
+components.html(html_string, height=600)
 
 # === Section 2: User inputs ===
 st.subheader("🧪 Try Prediction and Explanation")
