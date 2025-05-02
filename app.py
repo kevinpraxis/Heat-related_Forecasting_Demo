@@ -2,7 +2,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 import joblib
 import pandas as pd
-from llm_utils import explain_with_openai_for_row  # Your LLM explanation function
+from llm_utils import explain_with_openai_for_row  
+
+import openai
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # === Page setup ===
 st.set_page_config(page_title="Climformatics – Heat Risk Demo", layout="wide")
