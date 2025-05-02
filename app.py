@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import joblib
 import pandas as pd
-from llm_utils import explain_with_openai_for_row  # Your LLM explanation function
+from llm_utils import explain_with_openai_for_row, build_input_from_template
 
 # === Page setup ===
 st.set_page_config(page_title="Climformatics – Heat Risk Demo", layout="wide")
@@ -27,23 +27,27 @@ pipeline = joblib.load("Models/hsp_pred_pipeline.pkl")
 default_template = joblib.load("Models/default_input_template.pkl")
 explainer = joblib.load("Models/explainer.pkl")
 
-# Input fields
-temp = st.slider("T2M (mean temp)", -3.0, 3.0, 0.0, 0.1)
-wet = st.slider("T2MWET (wet bulb)", -3.0, 3.0, 0.0, 0.1)
-county = st.selectbox("County", [col for col in default_template if "county_" in col])
+# Build user inputs
+user_inputs = {
+    'CLRSKY_SFC_SW_DWN': st.slider("Clear Sky SW Down", -3.0, 3.0, 0.0, 0.1),
+    'CLRSKY_SFC_PAR_TOT': st.slider("PAR Total", -3.0, 3.0, 0.0, 0.1),
+    'T2M_roll3_mean': st.slider("T2M Rolling Mean", -3.0, 3.0, 0.0, 0.1),
+    'T2M_lag1': st.slider("T2M Lag-1", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET': st.slider("T2MWET", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET_lag1': st.slider("T2MWET Lag-1", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET_roll3_mean': st.slider("T2MWET Rolling Mean", -3.0, 3.0, 0.0, 0.1),
+    'T2M_max7': st.slider("T2M Max Last 7 Days", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET_max7': st.slider("T2MWET Max Last 7 Days", -3.0, 3.0, 0.0, 0.1),
+    'month': st.slider("Month", 1, 12, 7),
+    'T2M_T2MWET_interact': st.slider("T2M × T2MWET", -3.0, 3.0, 0.0, 0.1),
+    'county': st.selectbox("County", [col.replace("county_", "") for col in default_template.columns if col.startswith("county_")])
+}
 
-# Construct input row
-X_row = default_template.copy()
-X_row["T2M"] = temp
-X_row["T2MWET"] = wet
-for col in X_row:
-    if col.startswith("county_"):
-        X_row[col] = 1 if col == county else 0
-X_row_df = pd.DataFrame([X_row])
+# Build input row
+X_row = build_input_from_template(default_template, user_inputs)
 
 # Predict and explain
-prediction = pipeline.predict(X_row_df)[0]
 audience = st.selectbox("Explanation audience", ["general", "policy_maker", "scientific"])
 if st.button("Generate explanation"):
-    explanation = explain_with_openai_for_row(explainer, pipeline, X_row_df, audience)
+    explanation = explain_with_openai_for_row(explainer, pipeline, X_row, audience)
     st.markdown(f"### 🧠 Explanation\n{explanation}")
