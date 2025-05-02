@@ -17,7 +17,7 @@ This interactive demo shows:
 
 # === Section 1: Embedded trend plot ===
 st.subheader("📈 Temperature–Spike Trends")
-components.iframe("https://your-username.github.io/climformatics-visuals/tem_spike_trends.html", height=600)
+components.iframe("https://github.com/kevinpraxis/climformatics-visuals/blob/main/tem_spike_trends.html", height=600)
 
 # === Section 2: User inputs ===
 st.subheader("🧪 Try Prediction and Explanation")
