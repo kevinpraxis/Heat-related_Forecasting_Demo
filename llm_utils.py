@@ -101,3 +101,31 @@ def explain_with_openai_for_row(explainer, model_pipeline, X_row_raw, audience="
 
     return response.choices[0].message.content
 
+
+import pandas as pd
+
+def build_input_from_template(template_df, user_inputs):
+    """
+    Create a one-row input DataFrame by copying a default template and updating selected fields.
+
+    Args:
+        template_df: A DataFrame loaded from default_input_template.pkl (must have at least one row)
+        user_inputs: A dictionary of {column_name: value} to override in the first row
+
+    Returns:
+        X_row: One-row DataFrame ready for model prediction
+    """
+    if template_df.shape[0] == 0:
+        raise ValueError("Template DataFrame is empty.")
+
+    # Copy first row and update fields
+    X_row = template_df.copy()
+    for key, value in user_inputs.items():
+        if key not in X_row.columns:
+            raise KeyError(f"Column '{key}' not found in template.")
+        X_row.at[X_row.index[0], key] = value
+
+
+    return X_row
+
+
