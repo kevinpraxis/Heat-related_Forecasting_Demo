@@ -31,6 +31,8 @@ pipeline = joblib.load("Models/hsp_pred_pipeline.pkl")
 default_template = joblib.load("Models/default_input_template.pkl")
 explainer = joblib.load("Models/explainer.pkl")
 
+available_counties = [col.replace("county_", "") for col in default_template.columns if col.startswith("county_")]
+
 # Build user inputs
 user_inputs = {
     'CLRSKY_SFC_SW_DWN': st.slider("Clear Sky SW Down", -3.0, 3.0, 0.0, 0.1),
@@ -44,7 +46,7 @@ user_inputs = {
     'T2MWET_max7': st.slider("T2MWET Max Last 7 Days", -3.0, 3.0, 0.0, 0.1),
     'month': st.slider("Month", 1, 12, 7),
     'T2M_T2MWET_interact': st.slider("T2M × T2MWET", -3.0, 3.0, 0.0, 0.1),
-    'county': st.selectbox("County", [col.replace("county_", "") for col in default_template.columns if col.startswith("county_")])
+    'county': st.selectbox("County", available_counties)
 }
 
 # Build input row
