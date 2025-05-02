@@ -1,7 +1,8 @@
+import streamlit as st
+from openai import OpenAI
 import pandas as pd
 
-from openai import OpenAI
-client = OpenAI(api_key= openai_key)
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 
 # Format explanation prompt based on audience type
