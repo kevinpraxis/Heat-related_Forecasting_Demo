@@ -1,0 +1,103 @@
+openai_key = "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"
+
+import pandas as pd
+
+from openai import OpenAI
+client = OpenAI(api_key= openai_key)
+
+
+# Format explanation prompt based on audience type
+def get_prompt_by_audience(explanation_text, prediction, audience="general"):
+    label_text = "a spike (1)" if prediction == 1 else "not a spike (0)"
+
+    if audience == "general":
+        return f"""
+A machine learning model predicted this case as **{label_text}**, meaning there is an unusual rise in emergency visits.
+
+Here are the top model explanations (feature name, value, contribution):
+
+{explanation_text}
+
+Explain this in plain language for a non-technical audience. Focus on *why* this spike might occur. Use 3–5 sentences.
+"""
+    elif audience == "policy_maker":
+        return f"""
+This model was trained to support heat-health response planning. It predicts a **{label_text}** in emergency department (ED) visits.
+
+Key contributing features and their values:
+
+{explanation_text}
+
+Please summarize the likely cause of this spike and suggest **policy-relevant interpretations** in 2–3 sentences. Use clear but technical language, appropriate for government or NGO briefings.
+"""
+    elif audience == "scientific":
+        return f"""
+Model prediction: **{label_text}** (spike in heat-related ED visits)
+
+SHAP top features:
+
+{explanation_text}
+
+Please explain the mechanistic interpretation in **scientific terms** (e.g., thermoregulation, wet bulb effects), but still concise. Aim for clarity and precision.
+"""
+    else:
+        return f"Audience type '{audience}' not recognized."
+
+
+# Main explanation function
+def explain_with_openai_for_row(explainer, model_pipeline, X_row_raw, audience="general", top_n=5):
+    """
+    Generate a natural language explanation for a single input row using SHAP and GPT-4o.
+
+    Args:
+        explainer: A SHAP Explainer object, built from pipeline.named_steps['xgb']
+        model_pipeline: The full sklearn Pipeline (preprocess + xgb)
+        X_row_raw: Raw input row as DataFrame, Series, or dict (including 'county' as string)
+        audience: One of ['general', 'policy_maker', 'scientific']
+        top_n: Number of top SHAP features to show
+
+    Returns:
+        explanation: Natural language string from GPT-4o
+    """
+    # Ensure input is a single-row DataFrame
+    if isinstance(X_row_raw, dict):
+        X_row_raw = pd.DataFrame([X_row_raw])
+    elif isinstance(X_row_raw, pd.Series):
+        X_row_raw = X_row_raw.to_frame().T
+
+    # Transform input to match SHAP explainer background format
+    X_sparse = model_pipeline.named_steps['preprocess'].transform(X_row_raw)
+    feature_names = model_pipeline.named_steps['preprocess'].get_feature_names_out()
+    X_row_transformed = pd.DataFrame(X_sparse.toarray(), columns=feature_names)
+
+    # Predict label using full pipeline
+    prediction = model_pipeline.predict(X_row_raw)[0]
+
+    # Get SHAP values for the row
+    shap_row = explainer(X_row_transformed)[0]
+    shap_vals = shap_row.values
+    feature_vals = X_row_transformed.iloc[0].values
+
+    # Rank features by SHAP impact
+    top_features = sorted(
+        zip(feature_names, shap_vals, feature_vals),
+        key=lambda x: abs(x[1]), reverse=True
+    )[:top_n]
+
+    # Format explanation text
+    explanation_text = "\n".join([
+        f"{name} = {val:.2f}, SHAP: {impact:+.2f}"
+        for name, impact, val in top_features
+    ])
+
+    # Build prompt and query LLM
+    prompt = get_prompt_by_audience(explanation_text, prediction, audience)
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+        max_tokens=300
+    )
+
+    return response.choices[0].message.content
+
