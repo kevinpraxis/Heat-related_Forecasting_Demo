@@ -4,6 +4,7 @@ import pandas as pd
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+
 # === Format prompt by audience ===
 def get_prompt_by_audience(explanation_text, prediction, audience="general"):
     label_text = "a spike (1)" if prediction == 1 else "not a spike (0)"
