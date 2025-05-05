@@ -2,10 +2,10 @@ import streamlit as st
 from openai import OpenAI
 import pandas as pd
 
+
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-
-# Format explanation prompt based on audience type
+# === Format prompt by audience ===
 def get_prompt_by_audience(explanation_text, prediction, audience="general"):
     label_text = "a spike (1)" if prediction == 1 else "not a spike (0)"
 
@@ -43,53 +43,33 @@ Please explain the mechanistic interpretation in **scientific terms** (e.g., the
         return f"Audience type '{audience}' not recognized."
 
 
-# Main explanation function
+# === Main explanation function ===
 def explain_with_openai_for_row(explainer, model_pipeline, X_row_raw, audience="general", top_n=5):
-    """
-    Generate a natural language explanation for a single input row using SHAP and GPT-4o.
-
-    Args:
-        explainer: A SHAP Explainer object, built from pipeline.named_steps['xgb']
-        model_pipeline: The full sklearn Pipeline (preprocess + xgb)
-        X_row_raw: Raw input row as DataFrame, Series, or dict (including 'county' as string)
-        audience: One of ['general', 'policy_maker', 'scientific']
-        top_n: Number of top SHAP features to show
-
-    Returns:
-        explanation: Natural language string from GPT-4o
-    """
-    # Ensure input is a single-row DataFrame
     if isinstance(X_row_raw, dict):
         X_row_raw = pd.DataFrame([X_row_raw])
     elif isinstance(X_row_raw, pd.Series):
         X_row_raw = X_row_raw.to_frame().T
 
-    # Transform input to match SHAP explainer background format
     X_sparse = model_pipeline.named_steps['preprocess'].transform(X_row_raw)
     feature_names = model_pipeline.named_steps['preprocess'].get_feature_names_out()
     X_row_transformed = pd.DataFrame(X_sparse.toarray(), columns=feature_names)
 
-    # Predict label using full pipeline
     prediction = model_pipeline.predict(X_row_raw)[0]
 
-    # Get SHAP values for the row
     shap_row = explainer(X_row_transformed)[0]
     shap_vals = shap_row.values
     feature_vals = X_row_transformed.iloc[0].values
 
-    # Rank features by SHAP impact
     top_features = sorted(
         zip(feature_names, shap_vals, feature_vals),
         key=lambda x: abs(x[1]), reverse=True
     )[:top_n]
 
-    # Format explanation text
     explanation_text = "\n".join([
         f"{name} = {val:.2f}, SHAP: {impact:+.2f}"
         for name, impact, val in top_features
     ])
 
-    # Build prompt and query LLM
     prompt = get_prompt_by_audience(explanation_text, prediction, audience)
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -101,29 +81,16 @@ def explain_with_openai_for_row(explainer, model_pipeline, X_row_raw, audience="
     return response.choices[0].message.content
 
 
-import pandas as pd
-
+# === Build input from template ===
 def build_input_from_template(template_df, user_inputs):
-    """
-    Create a one-row input DataFrame by copying a default template and updating selected fields.
-
-    Args:
-        template_df: A DataFrame loaded from default_input_template.pkl (must have at least one row)
-        user_inputs: A dictionary of {column_name: value} to override in the first row
-
-    Returns:
-        X_row: One-row DataFrame ready for model prediction
-    """
     if template_df.shape[0] == 0:
         raise ValueError("Template DataFrame is empty.")
 
-    # Copy first row and update fields
     X_row = template_df.copy()
     for key, value in user_inputs.items():
         if key not in X_row.columns:
             raise KeyError(f"Column '{key}' not found in template.")
         X_row.at[X_row.index[0], key] = value
-
 
     return X_row
 
