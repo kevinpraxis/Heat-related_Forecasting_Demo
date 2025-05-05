@@ -2,8 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import pandas as pd
 
-
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # === Format prompt by audience ===
 def get_prompt_by_audience(explanation_text, prediction, audience="general"):
