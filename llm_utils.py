@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import pandas as pd
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # === Format prompt by audience ===
 def get_prompt_by_audience(explanation_text, prediction, audience="general"):
@@ -70,7 +70,7 @@ def explain_with_openai_for_row(explainer, model_pipeline, X_row_raw, audience="
     ])
 
     prompt = get_prompt_by_audience(explanation_text, prediction, audience)
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.4,
