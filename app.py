@@ -31,7 +31,7 @@ pipeline = joblib.load("Models/hsp_pred_pipeline.pkl")
 default_template = joblib.load("Models/default_input_template.pkl")
 explainer = joblib.load("Models/explainer.pkl")
 
-available_counties = sorted(X_wf['county'].unique())
+available_counties = sorted(default_template['county'].unique())
 
 # Build user inputs
 user_inputs = {
