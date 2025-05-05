@@ -2,6 +2,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 import joblib
 import pandas as pd
+import shap
+import matplotlib.pyplot as plt
 from llm_utils import explain_with_openai_for_row, build_input_from_template
 
 # === Page setup ===
@@ -17,8 +19,6 @@ This interactive demo shows:
 
 # === Section 1: Embedded trend plot ===
 st.subheader("📈 Temperature–Spike Trends")
-import streamlit.components.v1 as components
-
 with open("Assets/tem_spike_trends.html", "r", encoding="utf-8") as f:
     html_string = f.read()
 components.html(html_string, height=600)
@@ -31,9 +31,10 @@ pipeline = joblib.load("Models/hsp_pred_pipeline.pkl")
 default_template = joblib.load("Models/default_input_template.pkl")
 explainer = joblib.load("Models/explainer.pkl")
 
-available_counties = sorted(default_template['county'].unique())
+# Get county options
+available_counties = sorted(default_template["county"].unique())
 
-# Build user inputs
+# Build UI inputs
 user_inputs = {
     'CLRSKY_SFC_SW_DWN': st.slider("Clear Sky SW Down", -3.0, 3.0, 0.0, 0.1),
     'CLRSKY_SFC_PAR_TOT': st.slider("PAR Total", -3.0, 3.0, 0.0, 0.1),
@@ -49,11 +50,20 @@ user_inputs = {
     'county': st.selectbox("County", available_counties)
 }
 
-# Build input row
+# Build model-ready input row
 X_row = build_input_from_template(default_template, user_inputs)
 
-# Predict and explain
+# Explanation audience
 audience = st.selectbox("Explanation audience", ["general", "policy_maker", "scientific"])
+
 if st.button("Generate explanation"):
+    # GPT-generated explanation
     explanation = explain_with_openai_for_row(explainer, pipeline, X_row, audience)
     st.markdown(f"### 🧠 Explanation\n{explanation}")
+
+    # SHAP waterfall plot
+    st.subheader("🔍 SHAP Waterfall Explanation")
+    shap_value = explainer(X_row)[0]
+    fig, ax = plt.subplots()
+    shap.plots.waterfall(shap_value, max_display=10, show=False)
+    st.pyplot(fig)
