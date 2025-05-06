@@ -9,7 +9,7 @@ from llm_utils import explain_with_openai_for_row, build_input_from_template
 
 # === Page setup ===
 st.set_page_config(page_title="Climformatics – Heat Risk Demo", layout="wide")
-st.title("🔥 Climformatics – Heat-Related Hospitalization Forecast")
+st.title("🔥 Climformatics --– Heat-Related Hospitalization Forecast")
 
 st.markdown("""
 This interactive demo shows:
