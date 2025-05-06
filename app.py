@@ -74,7 +74,7 @@ if st.button("🔍 Generate Prediction & Explanation"):
     st.subheader("🧠 Model Prediction")
     st.markdown(f"""
     <div style='font-size:28px; font-weight:bold;'>
-        Spike in 3 Days? {'⚠️ <span style="color:red">Yes</span>' if prediction == 1 else '✅ <span style="color:green">No</span>'}
+        Spike in 3 Days? {'⚠️ <span style="color:red">Yes</span>' if prediction == 1 else '❎ <span style="color:green">No</span>'}
     </div>
     """, unsafe_allow_html=True)
     
