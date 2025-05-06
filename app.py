@@ -72,8 +72,17 @@ if st.button("🔍 Generate Prediction & Explanation"):
     probability = pipeline.predict_proba(X_row)[0][1]
 
     st.subheader("🧠 Model Prediction")
-    st.write(f"**Spike in 3 Days?** {'⚠️ Yes' if prediction == 1 else '✅ No'}")
-    st.write(f"**Estimated Probability:** {probability:.2%}")
+    st.markdown(f"""
+    <div style='font-size:28px; font-weight:bold;'>
+        Spike in 3 Days? {'⚠️ <span style="color:red">Yes</span>' if prediction == 1 else '✅ <span style="color:green">No</span>'}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown(f"""
+    <div style='font-size:24px;'>
+        <b>Estimated Probability:</b> <span style="color:#007acc">{probability:.2%}</span>
+    </div>
+    """, unsafe_allow_html=True)
 
     # === 2. SHAP Waterfall Plot ===
     st.subheader("🔍 SHAP Waterfall Explanation")
@@ -88,7 +97,7 @@ if st.button("🔍 Generate Prediction & Explanation"):
 
     # === 3. GPT-4o Explanation ===
     explanation = explain_with_openai_for_row(explainer, pipeline, X_row, audience)
-    st.markdown("### 📄 Narrative Explanation")
+    st.markdown("### 📄 Explanation (Powered by GPT-4o)")
     st.write(explanation)
 
 
