@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 import joblib
 import pandas as pd
 import shap
+import os
 import matplotlib.pyplot as plt
 from llm_utils import explain_with_openai_for_row, build_input_from_template
 
