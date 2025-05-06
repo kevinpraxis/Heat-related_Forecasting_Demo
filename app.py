@@ -44,19 +44,20 @@ available_counties = ['alameda', 'butte', 'contra costa', 'el dorado', 'fresno',
 
 # Build UI inputs
 user_inputs = {
-    'CLRSKY_SFC_SW_DWN': st.slider("Clear Sky SW Down", -3.0, 3.0, 0.0, 0.1),
-    'CLRSKY_SFC_PAR_TOT': st.slider("PAR Total", -3.0, 3.0, 0.0, 0.1),
-    'T2M_roll3_mean': st.slider("T2M Rolling Mean", -3.0, 3.0, 0.0, 0.1),
-    'T2M_lag1': st.slider("T2M Lag-1", -3.0, 3.0, 0.0, 0.1),
-    'T2MWET': st.slider("T2MWET", -3.0, 3.0, 0.0, 0.1),
-    'T2MWET_lag1': st.slider("T2MWET Lag-1", -3.0, 3.0, 0.0, 0.1),
-    'T2MWET_roll3_mean': st.slider("T2MWET Rolling Mean", -3.0, 3.0, 0.0, 0.1),
-    'T2M_max7': st.slider("T2M Max Last 7 Days", -3.0, 3.0, 0.0, 0.1),
-    'T2MWET_max7': st.slider("T2MWET Max Last 7 Days", -3.0, 3.0, 0.0, 0.1),
-    'month': st.slider("Month", 1, 12, 7),
-    'T2M_T2MWET_interact': st.slider("T2M × T2MWET", -3.0, 3.0, 0.0, 0.1),
-    'county': st.selectbox("County", available_counties)
+    'CLRSKY_SFC_SW_DWN': st.slider("Clear-Sky Surface Shortwave Radiation (Anomaly)", -3.0, 3.0, 0.0, 0.1),
+    'CLRSKY_SFC_PAR_TOT': st.slider("Clear-Sky PAR (Photosynthetically Active Radiation)", -3.0, 3.0, 0.0, 0.1),
+    'T2M_roll3_mean': st.slider("2m Temperature – 3-Day Rolling Mean", -3.0, 3.0, 0.0, 0.1),
+    'T2M_lag1': st.slider("2m Temperature – 1 Day Ago", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET': st.slider("Wet-Bulb Temperature (Current)", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET_lag1': st.slider("Wet-Bulb Temperature – 1 Day Ago", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET_roll3_mean': st.slider("Wet-Bulb Temp – 3-Day Rolling Mean", -3.0, 3.0, 0.0, 0.1),
+    'T2M_max7': st.slider("Max 2m Temperature – Past 7 Days", -3.0, 3.0, 0.0, 0.1),
+    'T2MWET_max7': st.slider("Max Wet-Bulb Temp – Past 7 Days", -3.0, 3.0, 0.0, 0.1),
+    'month': st.slider("Calendar Month", 1, 12, 7),
+    'T2M_T2MWET_interact': st.slider("Interaction: 2m Temp × Wet-Bulb Temp", -3.0, 3.0, 0.0, 0.1),
+    'county': st.selectbox("Target County", available_counties)
 }
+
 
 # Build model-ready input row
 X_row = build_input_from_template(default_template, user_inputs)
