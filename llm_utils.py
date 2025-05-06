@@ -11,34 +11,37 @@ def get_prompt_by_audience(explanation_text, prediction, audience="general"):
 
     if audience == "general":
         return f"""
-A machine learning model predicted this case as **{label_text}**, meaning there is an unusual rise in emergency visits.
+A machine learning model predicted this case as **{label_text}**, meaning there is a likely increase in emergency visits **within the next 3 days**.
 
 Here are the top model explanations (feature name, value, contribution):
 
 {explanation_text}
 
-Explain this in plain language for a non-technical audience. Focus on *why* this spike might occur. Use 3–5 sentences.
+Explain this in plain language for a non-technical audience. Focus on *why* this upcoming spike might occur. Use 3–5 sentences.
 """
+
     elif audience == "policy_maker":
         return f"""
-This model was trained to support heat-health response planning. It predicts a **{label_text}** in emergency department (ED) visits.
+This model supports heat-health emergency response planning by predicting **whether a spike in emergency department (ED) visits is likely within the next 3 days**.
 
 Key contributing features and their values:
 
 {explanation_text}
 
-Please summarize the likely cause of this spike and suggest **policy-relevant interpretations** in 2–3 sentences. Use clear but technical language, appropriate for government or NGO briefings.
+Please summarize the likely cause of this anticipated spike and suggest **policy-relevant interpretations or actions** in 2–3 sentences. Use concise, technical language suitable for briefings.
 """
+
     elif audience == "scientific":
         return f"""
-Model prediction: **{label_text}** (spike in heat-related ED visits)
+Model prediction: **{label_text}** (spike in heat-related ED visits anticipated in the next 3 days)
 
 SHAP top features:
 
 {explanation_text}
 
-Please explain the mechanistic interpretation in **scientific terms** (e.g., thermoregulation, wet bulb effects), but still concise. Aim for clarity and precision.
+Please explain the mechanistic interpretation of these drivers using scientific terms (e.g., thermoregulation, wet bulb effects), with clarity and conciseness.
 """
+
     else:
         return f"Audience type '{audience}' not recognized."
 
