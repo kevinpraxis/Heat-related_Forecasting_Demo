@@ -10,4 +10,3 @@ openai
 openai>=1.2.4
 pydeck
 matplotlib
-os
