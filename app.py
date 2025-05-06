@@ -57,6 +57,10 @@ X_row = build_input_from_template(default_template, user_inputs)
 audience = st.selectbox("Explanation audience", ["general", "policy_maker", "scientific"])
 
 if st.button("Generate explanation"):
+    # GPT-generated explanation
+    explanation = explain_with_openai_for_row(explainer, pipeline, X_row, audience)
+    st.markdown(f"### 🧠 Explanation\n{explanation}")
+    
     # SHAP waterfall plot
     st.subheader("🔍 SHAP Waterfall")
     X_sparse = pipeline.named_steps['preprocess'].transform(X_row)
@@ -69,7 +73,5 @@ if st.button("Generate explanation"):
     shap.plots.waterfall(shap_value, max_display=10, show=False)
     st.pyplot(fig)
 
-    # GPT-generated explanation
-    explanation = explain_with_openai_for_row(explainer, pipeline, X_row, audience)
-    st.markdown(f"### 🧠 Explanation\n{explanation}")
+
 
