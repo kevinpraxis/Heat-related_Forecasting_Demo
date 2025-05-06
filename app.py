@@ -65,22 +65,27 @@ X_row = build_input_from_template(default_template, user_inputs)
 # Explanation audience
 audience = st.selectbox("Explanation audience", ["general", "policy_maker", "scientific"])
 
-if st.button("Generate explanation"):
-    # GPT-generated explanation
-    explanation = explain_with_openai_for_row(explainer, pipeline, X_row, audience)
-    st.markdown(f"### 🧠 Explanation\n{explanation}")
-    
-    # SHAP waterfall plot
-    st.subheader("🔍 SHAP Waterfall")
-    X_sparse = pipeline.named_steps['preprocess'].transform(X_row)
-    feature_names = pipeline.named_steps['preprocess'].get_feature_names_out()
-    X_row_transformed = pd.DataFrame(X_sparse.toarray(), columns=feature_names)
-    
-    shap_value = explainer(X_row_transformed)[0]
+# ========== Prediction ==========
+if st.button("\U0001F50D Predict Heat Spike"):
+    prediction = model_wf.predict(input_df)[0]
+    probability = model_wf.predict_proba(input_df)[0][1]
 
-    fig, ax = plt.subplots()
-    shap.plots.waterfall(shap_value, max_display=10, show=False)
-    st.pyplot(fig)
+    st.subheader("\U0001F9E0 Prediction Result")
+    st.write(f"**Spike Tomorrow?** {'\u26a0\ufe0f Yes' if prediction == 1 else '\u2705 No'}")
+    st.write(f"**Probability of Spike:** {probability:.2%}")
+
+    st.subheader("\U0001F50D SHAP Explanation")
+    st.markdown("This SHAP plot explains which features most influenced the model's decision. Red bars increase risk, blue bars decrease it.")
+    st.markdown("**Example:** A high wet bulb temperature combined with recent heat trends might strongly push the model toward predicting a spike.")
+
+    shap_values = explainer(input_df)
+    renamed_input_df = input_df.rename(columns=feature_mapping)
+    shap_values.feature_names = renamed_input_df.columns.tolist()
+
+    plt.figure(figsize=(10, 5))
+    shap.plots.waterfall(shap_values[0], show=False)
+    st.pyplot(plt.gcf())
+    plt.clf()
 
 
 
