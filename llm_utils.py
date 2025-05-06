@@ -8,38 +8,39 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 # === Format prompt by audience ===
 def get_prompt_by_audience(explanation_text, prediction, audience="general"):
     label_text = "a spike (1)" if prediction == 1 else "not a spike (0)"
+    timeframe = "within the next 3 days"
 
     if audience == "general":
         return f"""
-A machine learning model predicted this case as **{label_text}**, meaning there is a likely increase in emergency visits **within the next 3 days**.
+The system predicted this case as **{label_text}**, meaning an unusual increase in heat-related emergency visits is expected **{timeframe}**.
 
-Here are the top model explanations (feature name, value, contribution):
+Top influencing features (feature name, value, SHAP contribution):
 
 {explanation_text}
 
-Explain this in plain language for a non-technical audience. Focus on *why* this upcoming spike might occur. Use 3–5 sentences.
+Please rewrite this into a clear, plain-language explanation suitable for a concerned community member. Focus on *why* this spike might happen.
 """
 
     elif audience == "policy_maker":
         return f"""
-This model supports heat-health emergency response planning by predicting **whether a spike in emergency department (ED) visits is likely within the next 3 days**.
+This predictive model supports heat-health planning by forecasting whether a spike in emergency department (ED) visits is likely **{timeframe}**.
 
-Key contributing features and their values:
+Key contributing drivers:
 
 {explanation_text}
 
-Please summarize the likely cause of this anticipated spike and suggest **policy-relevant interpretations or actions** in 2–3 sentences. Use concise, technical language suitable for briefings.
+Summarize the likely causes of this spike and recommend 1–2 brief, policy-relevant interpretations or responses. Language should be accessible but evidence-informed.
 """
 
     elif audience == "scientific":
         return f"""
-Model prediction: **{label_text}** (spike in heat-related ED visits anticipated in the next 3 days)
+Model output: **{label_text}** (probable spike in heat-related ED visits **{timeframe}**)
 
-SHAP top features:
+Top SHAP contributors:
 
 {explanation_text}
 
-Please explain the mechanistic interpretation of these drivers using scientific terms (e.g., thermoregulation, wet bulb effects), with clarity and conciseness.
+Provide a concise scientific interpretation. Discuss mechanistic relevance (e.g., wet bulb thermoregulation, heat lag effects, cumulative exposure) with clarity and precision.
 """
 
     else:
