@@ -33,7 +33,14 @@ default_template = joblib.load("Models/default_input_template.pkl")
 explainer = joblib.load("Models/explainer.pkl")
 
 # Get county options
-available_counties = sorted(default_template["county"].unique())
+available_counties = ['alameda', 'butte', 'contra costa', 'el dorado', 'fresno',
+       'humboldt', 'imperial', 'kern', 'lake', 'los angeles', 'madera',
+       'marin', 'mendocino', 'merced', 'monterey', 'napa', 'nevada',
+       'orange', 'placer', 'riverside', 'sacramento', 'san bernardino',
+       'san diego', 'san francisco', 'san joaquin', 'san luis obispo',
+       'san mateo', 'santa barbara', 'santa clara', 'santa cruz',
+       'shasta', 'siskiyou', 'solano', 'sonoma', 'stanislaus', 'tehama',
+       'tulare', 'tuolumne', 'ventura', 'yolo']
 
 # Build UI inputs
 user_inputs = {
