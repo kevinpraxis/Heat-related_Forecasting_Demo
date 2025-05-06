@@ -63,7 +63,12 @@ if st.button("Generate explanation"):
 
     # SHAP waterfall plot
     st.subheader("🔍 SHAP Waterfall Explanation")
-    shap_value = explainer(X_row)[0]
+    X_sparse = pipeline.named_steps['preprocess'].transform(X_row)
+    feature_names = pipeline.named_steps['preprocess'].get_feature_names_out()
+    X_row_transformed = pd.DataFrame(X_sparse.toarray(), columns=feature_names)
+    
+    shap_value = explainer(X_row_transformed)[0]
+
     fig, ax = plt.subplots()
     shap.plots.waterfall(shap_value, max_display=10, show=False)
     st.pyplot(fig)
